@@ -1,0 +1,3 @@
+<form class="shop-form" data-product data-cost="<?=h($p['price'])?>">
+<input type="hidden" name="id" value="<?=(int)$p['id']?>"><label>Pack size<select name="pack"><option value="1">Single bottle</option><option value="12">Pack of 12</option><option value="24">Pack of 24</option></select></label>
+<label>Quantity <span class="stepper"><button type="button" data-step="-1" aria-label="Decrease quantity">−</button><input type="number" name="qty" value="1" min="1" max="9999" required><button type="button" data-step="1" aria-label="Increase quantity">+</button></span></label><output></output><button class="primary" <?= $p['stock']<1?'disabled':'' ?>><?= $p['stock']<1?'Sold out':'Add to cart' ?></button></form>

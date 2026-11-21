@@ -1,0 +1,14 @@
+<?php
+if (!isset($tabs,$r,$tab)) {http_response_code(404);exit;}
+$product=$tab==='products';$id=(int)($r['id'] ?? 0);
+$name=$product?'product':'coupon';
+?>
+<details class="editor"><summary><?=h($id?($r['name'] ?? $r['code']):'Add '.$name)?><?= $id && !$r['is_active']?' · Inactive':'' ?></summary><form method="post"><?php token_field(); ?><input type="hidden" name="id" value="<?=$id?>"><input type="hidden" name="version" value="<?=hash('sha256',serialize($r))?>">
+<?php if ($product): ?><label>Name<input required name="name" maxlength="120" value="<?=h($r['name'] ?? '')?>"></label><label>Type<select name="type"><?php foreach (['bottle','tank'] as $type): ?><option <?=($r['type'] ?? '')===$type?'selected':''?>><?=$type?></option><?php endforeach; ?></select></label>
+<label>Capacity in litres<input required type="number" name="size_litres" min=".01" max="99999.99" step=".01" value="<?=h($r['size_litres'] ?? '')?>"></label>
+<label>Unit price (₹)<input required type="number" name="price" min="0" step=".01" value="<?=h($r['price'] ?? '')?>"></label>
+<label>Stock in units<input required type="number" name="stock" min="0" value="<?=(int)($r['stock'] ?? 0)?>"></label>
+<label>Product image<select name="image"><option value="">Use default illustration</option><?php foreach(glob(__DIR__.'/../assets/img/*') as $file): $path='assets/img/'.basename($file);if(!preg_match('~^assets/img/[a-zA-Z0-9_-]+\.(png|jpe?g|webp|svg)$~iD',$path)) continue; ?><option value="<?=h($path)?>" <?=($r['image'] ?? '')===$path?'selected':''?>><?=h(basename($file))?></option><?php endforeach; ?></select></label><small>Add image files to assets/img to include them in this list.</small>
+<?php else: ?><label>Code<input name="code" required maxlength="32" pattern="[A-Za-z0-9_\-]+" value="<?=h($r['code'] ?? '')?>"></label>
+<label>Discount type<select name="discount_type"><option value="fixed">Fixed amount (₹)</option><option value="percent" <?=($r['discount_type'] ?? '')==='percent'?'selected':''?>>Percentage</option></select></label><label>Discount value<input type="number" required name="value" min=".01" step=".01" value="<?=h($r['value'] ?? '')?>"></label><label>Minimum cart amount (₹)<input type="number" required name="min_amount" min="0" step=".01" value="<?=h($r['min_amount'] ?? '0')?>"></label><label>Expires at (India time, optional)<input type="datetime-local" name="expires_at" value="<?=h(str_replace(' ','T',substr($r['expires_at'] ?? '',0,16)))?>"></label><?php endif; ?>
+<label><input type="checkbox" name="active" value="1" <?=($r['is_active'] ?? 1)?'checked':''?>> Active</label><button name="action" value="save">Save <?=$name?></button><?php if ($id): ?><button formnovalidate name="action" value="delete" onclick="return confirm('Delete this record? Records used in orders will be deactivated.')">Delete</button><?php endif; ?></form></details>
